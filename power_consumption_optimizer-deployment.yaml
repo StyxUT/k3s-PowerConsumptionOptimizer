@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: power-consumption-optimizer
+  labels:
+    app: power-consumption-optimizer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: power-consumption-optimizer
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: power-consumption-optimizer
+    spec:
+      containers:
+        - name: power-consumption-optimizer
+          imagePullPolicy: "IfNotPresent"
+          image: docker.io/styxut/power-consumption-optimizer:latest
+          env:
+            - name: "ASPNETCORE_ENVIRONMENT"
+              value: "Production"
+          volumeMounts:
+            - name: appsettings-json-volume
+              mountPath: /app/appsettings.Production.json
+              subPath: appsettings.Production.json
+            - name: forecast-appsettings-json-volume
+              mountPath: /app/forecast-appsettings.Production.json
+              subPath: forecast-appsettings.Production.json
+            - name: k8s-pv02
+              mountPath: /config
+              subPath: PowerConsumptionOptimizer/config
+      volumes:
+        - name: k8s-pv02
+          persistentVolumeClaim:
+            claimName: synology-k8s-pv02
+        - name: appsettings-json-volume
+          secret:
+            secretName: appsettings-json
+        - name: forecast-appsettings-json-volume
+          secret:
+            secretName: forecast-appsettings-json
