@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: power-consumption-optimizer
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: "Always"
           image: docker.io/styxut/power-consumption-optimizer:latest
           env:
             - name: "ASPNETCORE_ENVIRONMENT"
