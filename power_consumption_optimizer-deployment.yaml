@@ -18,29 +18,44 @@ spec:
         app: power-consumption-optimizer
     spec:
       containers:
+        - name: forecast
+          imagePullPolicy: "Always"
+          image: docker.io/styxut/forecast:dev
+          ports:
+            - containerPort: 8980
+          env:
+          - name: "ASPNETCORE_ENVIRONMENT"
+            value: "Production"
+          # readinessProbe:
+          #   httpGet:
+          #     path: /api/Forecast/HealthCheck
+          #     port: 8980
+          #   initialDelaySeconds: 10 
+          #   periodSeconds: 120
+          volumeMounts:
+          - name: forecast-appsettings-volume
+            mountPath: "/app/forecast-appsettings.Production.json"
+            subPath: "forecast-appsettings.Production.json"
         - name: power-consumption-optimizer
           imagePullPolicy: "Always"
-          image: docker.io/styxut/power-consumption-optimizer:latest
+          image: styxut/powerconsumptionoptimizer:dev
           env:
-            - name: "ASPNETCORE_ENVIRONMENT"
-              value: "Production"
+          - name: "ASPNETCORE_ENVIRONMENT"
+            value: "Production"
           volumeMounts:
-            - name: appsettings-json-volume
-              mountPath: /app/appsettings.Production.json
-              subPath: appsettings.Production.json
-            - name: forecast-appsettings-json-volume
-              mountPath: /app/forecast-appsettings.Production.json
-              subPath: forecast-appsettings.Production.json
-            - name: k8s-pv02
-              mountPath: /config
-              subPath: PowerConsumptionOptimizer/config
-      volumes:
-        - name: k8s-pv02
-          persistentVolumeClaim:
-            claimName: synology-k8s-pv02
-        - name: appsettings-json-volume
-          secret:
-            secretName: appsettings-json
-        - name: forecast-appsettings-json-volume
-          secret:
-            secretName: forecast-appsettings-json
+          - name: pco-appsettings-volume
+            mountPath: "/app/appsettings.Production.json"
+            subPath: "appsettings.Production.json"
+      volumes:  
+      - name: forecast-appsettings-volume
+        configMap:
+          name: forecast-cm
+          items:
+          - key: forecast-appsettings.Production.json
+            path: forecast-appsettings.Production.json
+      - name: pco-appsettings-volume
+        configMap:
+          name: pco-cm  
+          items:
+          - key: appsettings.Production.json
+            path: appsettings.Production.json

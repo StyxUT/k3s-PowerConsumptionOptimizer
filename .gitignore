@@ -1,3 +1,2 @@
-*.json
-*secrets.yaml
-*secret.yaml
+pco-cm.yaml
+forecast-cm.yaml
